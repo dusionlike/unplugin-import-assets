@@ -1,6 +1,6 @@
 {
-  "name": "unplugin-starter",
-  "version": "0.1.0",
+  "name": "unplugin-import-assets",
+  "version": "0.1.0-alpha.1",
   "packageManager": "pnpm@7.1.1",
   "description": "Register global imports on demand for Vite and Webpack",
   "license": "MIT",
@@ -76,7 +76,8 @@
     "test": "vitest"
   },
   "dependencies": {
-    "unplugin": "^0.7.1"
+    "unplugin": "^0.7.1",
+    "vite-plugin-inspect": "^0.6.0"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^0.25.2",
