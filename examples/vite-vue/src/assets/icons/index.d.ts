@@ -1,5 +1,5 @@
 declare module 'src/assets/icons/logo.svg' {
-  import React from 'react';
-  const SvgLogo: React.FC<React.SVGProps<SVGSVGElement>>;
+  import type { DefineComponent } from 'vue'
+  const SvgLogo: DefineComponent<{}, {}, any>;
   export default SvgLogo;
 }

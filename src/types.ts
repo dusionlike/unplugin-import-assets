@@ -3,6 +3,7 @@ export interface Options {
    * 需要处理的目录
    */
   imports: ImportOptions[]
+  porjectFramework?: 'vue' | 'react'
 }
 
 export interface ImportOptions {

@@ -25,3 +25,11 @@ export function createDirFilter(dirs: string[]) {
     return dirs.some(dir => id.includes(dir))
   }
 }
+
+/**
+ * 判断是vue项目还是react项目
+ */
+export function getProjectFramework(packageJson: any): 'vue' | 'react' {
+  const dependencies: Record<string, string> = { ...packageJson.dependencies, ...packageJson.devDependencies }
+  return Object.keys(dependencies).some(key => key.includes('vue')) ? 'vue' : 'react'
+}

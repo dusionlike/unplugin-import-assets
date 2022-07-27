@@ -15,7 +15,7 @@ export async function runDeclareAssets(options: Options) {
     let timer = undefined as any
 
     async function run() {
-      const source = await resolveDir(importItem, filter)
+      const source = await resolveDir(importItem, filter, options.porjectFramework)
       const dtsDir = importItem.dts || path.join(importItem.targetDir, 'index.d.ts')
       await fs.promises.writeFile(dtsDir, source, { encoding: 'utf8' })
     }
@@ -42,6 +42,7 @@ export async function runDeclareAssets(options: Options) {
 async function resolveDir(
   importItem: ImportOptions,
   filter: (id: unknown) => boolean,
+  porjectFramework: 'vue' | 'react' | undefined,
 ) {
   const transformSvgToComponent = !!importItem.transformSvgToComponent
   const targetDir = importItem.targetDir
@@ -51,7 +52,7 @@ async function resolveDir(
     const nowDir = path.join(targetDir, dir)
     const stat = await fs.promises.stat(nowDir)
     if (stat.isDirectory()) {
-      modelStr += await resolveDir({ ...importItem, targetDir: nowDir }, filter)
+      modelStr += await resolveDir({ ...importItem, targetDir: nowDir }, filter, porjectFramework)
     }
     else if (filter(dir)) {
       const prefix = importItem.prefix || ''
@@ -74,13 +75,24 @@ async function resolveDir(
         // await fs.promises.writeFile(tempFilePath, componentCode, {
         //   encoding: 'utf8',
         // })
-        modelStr += [
-          `declare module '${modulePath}' {`,
-          '  import React from \'react\';',
-          `  const ${moduleName}: React.FC<React.SVGProps<SVGSVGElement>>;`,
-          `  export default ${moduleName};`,
-          '}\n',
-        ].join('\n')
+        if (porjectFramework === 'vue') {
+          modelStr += [
+            `declare module '${modulePath}' {`,
+            '  import type { DefineComponent } from \'vue\'',
+            `  const ${moduleName}: DefineComponent<{}, {}, any>;`,
+            `  export default ${moduleName};`,
+            '}\n',
+          ].join('\n')
+        }
+        else {
+          modelStr += [
+            `declare module '${modulePath}' {`,
+            '  import React from \'react\';',
+            `  const ${moduleName}: React.SVGProps<SVGSVGElement>;`,
+            `  export default ${moduleName};`,
+            '}\n',
+          ].join('\n')
+        }
       }
       else {
         modelStr += [
