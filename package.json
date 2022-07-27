@@ -76,8 +76,8 @@
     "test": "vitest"
   },
   "dependencies": {
-    "unplugin": "^0.7.1",
-    "vite-plugin-inspect": "^0.6.0"
+    "@rollup/pluginutils": "^4.2.1",
+    "unplugin": "^0.8.0"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^0.25.2",
@@ -86,6 +86,7 @@
     "eslint": "^8.19.0",
     "esno": "^0.16.3",
     "fast-glob": "^3.2.11",
+    "fsevents": "^2.3.2",
     "nodemon": "^2.0.18",
     "rimraf": "^3.0.2",
     "rollup": "^2.75.7",
@@ -93,6 +94,7 @@
     "typescript": "^4.7.4",
     "vite": "^2.9.13",
     "vitest": "^0.17.0",
-    "webpack": "^5.73.0"
+    "webpack": "^5.73.0",
+    "vite-plugin-inspect": "^0.6.0"
   }
 }

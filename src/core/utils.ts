@@ -13,3 +13,15 @@ export function transformFileName(str: string): string {
 
   return str
 }
+
+export function getTempPath(filePath: string): string {
+  return filePath
+    .replace(/\.svg$/, '.jsx')
+    .replace(/^\/?src/, '/node_modules/.unplugin-import-assets/svg')
+}
+
+export function createDirFilter(dirs: string[]) {
+  return (id: string) => {
+    return dirs.some(dir => id.includes(dir))
+  }
+}
