@@ -4,7 +4,8 @@ import { watch } from 'chokidar'
 import { createFilter } from '@rollup/pluginutils'
 import type { FSWatcher } from 'chokidar'
 import type { ImportOptions, Options } from '../types'
-import { transformFileName } from './utils'
+import { getTempPath, transformFileName } from './utils'
+import { transformSvgToVueComponent } from './svg'
 // import { transformSvgToReactComponent } from './svg'
 
 export async function runDeclareAssets(options: Options) {
@@ -20,12 +21,20 @@ export async function runDeclareAssets(options: Options) {
       await fs.promises.writeFile(dtsDir, source, { encoding: 'utf8' })
     }
     await run()
-    const watcher = watch(importItem.targetDir).on('all', () => {
-      if (timer)
-        clearTimeout(timer)
-      timer = setTimeout(() => {
-        run()
-      }, 500)
+
+    let delay = true
+    setTimeout(() => delay = false, 1000)
+
+    const watcher = watch(importItem.targetDir, {}).on('all', (event, id) => {
+      // 防止死循环，第一次监听时，不执行
+      if (!id.endsWith('.ts') && !delay && ['add', 'change', 'unlink'].includes(event)) {
+        ['add', 'change'].includes(event) && renderSvgToTemp(id, 'vue')
+        if (timer)
+          clearTimeout(timer)
+        timer = setTimeout(() => {
+          run()
+        }, 500)
+      }
     })
     watchList.push(watcher)
   }
@@ -55,26 +64,13 @@ async function resolveDir(
       modelStr += await resolveDir({ ...importItem, targetDir: nowDir }, filter, porjectFramework)
     }
     else if (filter(dir)) {
-      const prefix = importItem.prefix || ''
-      const moduleName = transformFileName(`${prefix}-${path.basename(dir)}`)
+      const prefix = importItem.prefix ? `${importItem.prefix}-` : ''
+      const moduleName = transformFileName(`${prefix}${path.basename(dir)}`)
       let modulePath = nowDir.replace(/\\/g, '/')
       if (modulePath[0] === '/')
         modulePath = modulePath.substring(1)
 
       if (transformSvgToComponent && modulePath.endsWith('.svg')) {
-        // 如果是svg，则转换成组件，并且放到临时目录
-        // const svgCode = await fs.promises.readFile(nowDir, 'utf8')
-        // const componentCode = transformSvgToReactComponent(svgCode)
-        // const tempFilePath = getTempPath(modulePath).substring(1)
-
-        // const tempDirname = path.dirname(tempFilePath)
-
-        // if (!fs.existsSync(tempDirname))
-        //   await fs.promises.mkdir(tempDirname, { recursive: true })
-
-        // await fs.promises.writeFile(tempFilePath, componentCode, {
-        //   encoding: 'utf8',
-        // })
         if (porjectFramework === 'vue') {
           modelStr += [
             `declare module '${modulePath}' {`,
@@ -105,4 +101,25 @@ async function resolveDir(
     }
   }
   return modelStr
+}
+
+/**
+ * 将svg路径转换成vue组件并放在临时文件路径
+ * @param id svg文件路径
+ * @param suffix
+ */
+export async function renderSvgToTemp(id: string, suffix: string) {
+  const cwd = path.resolve('./')
+  const tempId = path.join(cwd, getTempPath(id, suffix))
+  const tempDir = path.dirname(tempId)
+  if (!fs.existsSync(tempDir))
+    await fs.promises.mkdir(tempDir, { recursive: true })
+
+  const svgCode = await fs.promises.readFile(id, 'utf8')
+  const componentCode = transformSvgToVueComponent(svgCode)
+
+  await fs.promises.writeFile(tempId, componentCode, {
+    encoding: 'utf8',
+  })
+  return tempId
 }

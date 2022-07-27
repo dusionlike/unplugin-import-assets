@@ -14,8 +14,8 @@ Starter template for [unplugin](https://github.com/unjs/unplugin).
 
 - 只生成 `d.ts` 文件，没有引用的文件不会被打包
 - import时显示完整路径，可与vscode扩展 [Image preview](https://marketplace.visualstudio.com/items?itemName=kisstkondoros.vscode-gutter-preview) 配合
-- 同时支持 `vite` 和 ~~`webpack` (webpack没测试过)~~
-- ~~SVG转组件支持 `vue` (目前不支持，后面有空搞搞)~~
+- 同时支持 `vite` 和 ~~`webpack` (webpack没测试过，应该可以吧😛)~~
+- SVG转组件同时支持 `vue` 和 `react`
 
 ## 预览
 
@@ -24,8 +24,7 @@ Starter template for [unplugin](https://github.com/unjs/unplugin).
 ## 使用
 
 
-<details>
-<summary>Vite</summary><br>
+### Vite
 
 ```ts
 // vite.config.ts
@@ -43,11 +42,8 @@ export default defineConfig({
 })
 ```
 
-<br></details>
 
-
-<details>
-<summary>Webpack</summary><br>
+### Webpack
 
 ```ts
 // webpack.config.js
@@ -64,10 +60,7 @@ module.exports = {
 }
 ```
 
-<br></details>
-
-<details>
-<summary>Vue CLI</summary><br>
+### Vue CLI
 
 ```ts
 // vue.config.js
@@ -77,7 +70,7 @@ module.exports = {
       require('unplugin-import-assets/webpack')({
         imports: [
           { targetDir: 'src/assets/images', prefix: 'Img' },
-          { targetDir: 'src/assets/icons', prefix: 'Svg' },
+          { targetDir: 'src/assets/icons', prefix: 'Svg', transformSvgToComponent: true },
         ],
       }),
     ],
@@ -85,6 +78,4 @@ module.exports = {
 }
 ```
 
-<br></details>
-
-<br></details>
+> todo: 蹲一个有缘人帮忙写英文readme

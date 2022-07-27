@@ -2,10 +2,10 @@ import path from 'path'
 import fs from 'fs'
 import { createUnplugin } from 'unplugin'
 import type { FSWatcher } from 'chokidar'
-import { runDeclareAssets } from './core/declareAssets'
+import { renderSvgToTemp, runDeclareAssets } from './core/declareAssets'
 import { createDirFilter, getProjectFramework } from './core/utils'
 import type { Options } from './types'
-import { transformSvgToReactComponent, transformSvgToVueComponent } from './core/svg'
+import { transformSvgToReactComponent } from './core/svg'
 
 export default createUnplugin<Options>((_options) => {
   if (!_options)
@@ -34,11 +34,15 @@ export default createUnplugin<Options>((_options) => {
     buildEnd() {
       watchList.forEach(item => item.close())
     },
-    resolveId(id) {
+    async resolveId(id) {
       if (hasTransformSvgToComponent && id.endsWith('.svg') && svgFilter(id)) {
-        // 将svg路径转换成临时文件路径
-        // return path.join(cwd, getTempPath(id))
-        return `\0virtual:${id.replace(/\.svg$/, `.svg.${componentSuffix}`)}`
+        if (componentSuffix === 'vue') {
+          // vue 需要使用放到缓存目录的方案
+          return renderSvgToTemp(id, 'vue')
+        }
+        else {
+          return `\0virtual:${id.replace(/\.svg$/, `.svg.${componentSuffix}`)}`
+        }
       }
 
       if (id.startsWith('src/'))
@@ -47,9 +51,7 @@ export default createUnplugin<Options>((_options) => {
     async load(id) {
       if (id.endsWith(`.svg.${componentSuffix}`)) {
         const svgCode = await fs.promises.readFile(id.replace('\0virtual:', '').replace(`.svg.${componentSuffix}`, '.svg'), 'utf8')
-        const componentCode = options.porjectFramework === 'vue'
-          ? transformSvgToVueComponent(svgCode)
-          : transformSvgToReactComponent(svgCode)
+        const componentCode = transformSvgToReactComponent(svgCode)
         return componentCode
       }
     },

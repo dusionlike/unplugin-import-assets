@@ -14,9 +14,9 @@ export function transformFileName(str: string): string {
   return str
 }
 
-export function getTempPath(filePath: string): string {
+export function getTempPath(filePath: string, suffix = 'jsx'): string {
   return filePath
-    .replace(/\.svg$/, '.jsx')
+    .replace(/\.svg$/, `.${suffix}`)
     .replace(/^\/?src/, '/node_modules/.unplugin-import-assets/svg')
 }
 
