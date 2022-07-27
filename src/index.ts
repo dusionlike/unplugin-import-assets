@@ -1,25 +1,33 @@
 import path from 'path'
 import fs from 'fs'
 import { createUnplugin } from 'unplugin'
+import type { FSWatcher } from 'chokidar'
 import { runDeclareAssets } from './core/declareAssets'
 import { createDirFilter } from './core/utils'
 import type { Options } from './types'
 import { transformSvgToReactComponent } from './core/svg'
 
-export default createUnplugin<Options>((options) => {
+export default createUnplugin<Options>((_options) => {
+  if (!_options)
+    throw new Error('options is required')
+  const options = initOption(_options)
+
   const hasTransformSvgToComponent = options?.imports.some(item => item.transformSvgToComponent)
   const svgFilter = createDirFilter(options?.imports.filter(item => item.transformSvgToComponent)
     .map(item => item.targetDir) || [])
 
   const cwd = path.resolve('./')
 
+  // 监听列表
+  let watchList: FSWatcher[] = []
+
   return {
     name: 'unplugin-import-assets',
     async buildStart() {
-      if (options) {
-        options = initOption(options)
-        await runDeclareAssets(options)
-      }
+      watchList = await runDeclareAssets(options)
+    },
+    buildEnd() {
+      watchList.forEach(item => item.close())
     },
     resolveId(id) {
       if (hasTransformSvgToComponent && id.endsWith('.svg') && svgFilter(id)) {

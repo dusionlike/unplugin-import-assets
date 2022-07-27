@@ -1,17 +1,36 @@
 import fs from 'fs'
 import path from 'path'
+import { watch } from 'chokidar'
 import { createFilter } from '@rollup/pluginutils'
+import type { FSWatcher } from 'chokidar'
 import type { ImportOptions, Options } from '../types'
 import { transformFileName } from './utils'
 // import { transformSvgToReactComponent } from './svg'
 
 export async function runDeclareAssets(options: Options) {
+  const watchList: FSWatcher[] = []
   for (const importItem of options.imports) {
     const filter = createFilter(importItem.include, ['*.ts'])
-    const source = await resolveDir(importItem, filter)
-    const dtsDir = importItem.dts || path.join(importItem.targetDir, 'index.d.ts')
-    await fs.promises.writeFile(dtsDir, source, { encoding: 'utf8' })
+    // 延迟操作，同时导出多个文件只执行一次
+    let timer = undefined as any
+
+    async function run() {
+      const source = await resolveDir(importItem, filter)
+      const dtsDir = importItem.dts || path.join(importItem.targetDir, 'index.d.ts')
+      await fs.promises.writeFile(dtsDir, source, { encoding: 'utf8' })
+    }
+    await run()
+    const watcher = watch(importItem.targetDir).on('all', () => {
+      if (timer)
+        clearTimeout(timer)
+      timer = setTimeout(() => {
+        run()
+      }, 500)
+    })
+    watchList.push(watcher)
   }
+
+  return watchList
 }
 
 /**

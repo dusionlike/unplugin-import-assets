@@ -3,7 +3,6 @@ export interface Options {
    * 需要处理的目录
    */
   imports: ImportOptions[]
-  dirname?: string
 }
 
 export interface ImportOptions {

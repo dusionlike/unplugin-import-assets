@@ -14,7 +14,6 @@ export default defineConfig({
         { targetDir: 'src/assets/images', prefix: 'Img' },
         { targetDir: 'src/assets/icons', prefix: 'Svg', transformSvgToComponent: true },
       ],
-      dirname: __dirname,
     }),
   ],
 })
