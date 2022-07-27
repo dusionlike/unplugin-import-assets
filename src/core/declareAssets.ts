@@ -2,8 +2,8 @@ import fs from 'fs'
 import path from 'path'
 import { createFilter } from '@rollup/pluginutils'
 import type { ImportOptions, Options } from '../types'
-import { getTempPath, transformFileName } from './utils'
-import { transformSvgToReactComponent } from './svg'
+import { transformFileName } from './utils'
+// import { transformSvgToReactComponent } from './svg'
 
 export async function runDeclareAssets(options: Options) {
   for (const importItem of options.imports) {
@@ -41,20 +41,20 @@ async function resolveDir(
       if (modulePath[0] === '/')
         modulePath = modulePath.substring(1)
 
-      // 如果是svg，则转换成组件，并且放到临时目录
       if (transformSvgToComponent && modulePath.endsWith('.svg')) {
-        const svgCode = await fs.promises.readFile(nowDir, 'utf8')
-        const componentCode = transformSvgToReactComponent(svgCode)
-        const tempFilePath = getTempPath(modulePath).substring(1)
+        // 如果是svg，则转换成组件，并且放到临时目录
+        // const svgCode = await fs.promises.readFile(nowDir, 'utf8')
+        // const componentCode = transformSvgToReactComponent(svgCode)
+        // const tempFilePath = getTempPath(modulePath).substring(1)
 
-        const tempDirname = path.dirname(tempFilePath)
+        // const tempDirname = path.dirname(tempFilePath)
 
-        if (!fs.existsSync(tempDirname))
-          await fs.promises.mkdir(tempDirname, { recursive: true })
+        // if (!fs.existsSync(tempDirname))
+        //   await fs.promises.mkdir(tempDirname, { recursive: true })
 
-        await fs.promises.writeFile(tempFilePath, componentCode, {
-          encoding: 'utf8',
-        })
+        // await fs.promises.writeFile(tempFilePath, componentCode, {
+        //   encoding: 'utf8',
+        // })
         modelStr += [
           `declare module '${modulePath}' {`,
           '  import React from \'react\';',
