@@ -88,7 +88,7 @@ async function resolveDir(
           modelStr += [
             `declare module '${modulePath}' {`,
             '  import React from \'react\';',
-            `  const ${moduleName}: React.SVGProps<SVGSVGElement>;`,
+            `  const ${moduleName}: React.FC<React.SVGProps<SVGSVGElement>>;`,
             `  export default ${moduleName};`,
             '}\n',
           ].join('\n')

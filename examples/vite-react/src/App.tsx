@@ -10,7 +10,6 @@ function App() {
     <div className="App">
       <header className="App-header">
         <SvgLogo />
-        {/* <img src={SvgLogo} className="App-logo" alt="logo" /> */}
         <img src={ImgCarIco} alt="" />
         <p>Hello Vite + React!</p>
         <p>

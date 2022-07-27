@@ -1,60 +1,46 @@
-# unplugin-starter
+# unplugin-import-assets
 
-[![NPM version](https://img.shields.io/npm/v/unplugin-starter?color=a1b858&label=)](https://www.npmjs.com/package/unplugin-starter)
+[![NPM version](https://img.shields.io/npm/v/unplugin-import-assets?color=a1b858&label=)](https://www.npmjs.com/package/unplugin-import-assets)
 
 Starter template for [unplugin](https://github.com/unjs/unplugin).
 
-## Template Usage
+## Why?
 
-To use this template, clone it down using:
+自动生成资源文件的typescript声明文件，让你import资源文件的时候也能有代码提示，自动导入
 
-```bash
-npx degit antfu/unplugin-starter my-unplugin
-```
+## Features
 
-And do a global replace of `unplugin-starter` with your plugin name.
+灵感来自[vite-plugin-hot-export](https://github.com/sudongyuer/vite-plugin-hot-export)，但是
 
-Then you can start developing your unplugin 🔥
+- 只生成 `d.ts` 文件，没有引用的文件不会被打包
+- import时显示完整路径，可与vscode扩展 [Image preview](https://marketplace.visualstudio.com/items?itemName=kisstkondoros.vscode-gutter-preview) 配合
+- 同时支持 `vite` 和 ~~`webpack` (webpack没测试过)~~
+- ~~SVG转组件支持 `vue` (目前不支持，后面有空搞搞)~~
 
-To test your plugin, run: `pnpm run dev`
-To release a new version, run: `pnpm run release`
+## 预览
 
-## Install
+![预览图](./preview.gif)
 
-```bash
-npm i unplugin-starter
-```
+## 使用
+
 
 <details>
 <summary>Vite</summary><br>
 
 ```ts
 // vite.config.ts
-import Starter from 'unplugin-starter/vite'
+import ImportAssets from 'unplugin-import-assets/vite'
 
 export default defineConfig({
   plugins: [
-    Starter({ /* options */ }),
+    ImportAssets({
+      imports: [
+        { targetDir: 'src/assets/images', prefix: 'Img' },
+        { targetDir: 'src/assets/icons', prefix: 'Svg', transformSvgToComponent: true },
+      ],
+    }),
   ],
 })
-```
-
-Example: [`playground/`](./playground/)
-
-<br></details>
-
-<details>
-<summary>Rollup</summary><br>
-
-```ts
-// rollup.config.js
-import Starter from 'unplugin-starter/rollup'
-
-export default {
-  plugins: [
-    Starter({ /* options */ }),
-  ],
-}
 ```
 
 <br></details>
@@ -68,26 +54,15 @@ export default {
 module.exports = {
   /* ... */
   plugins: [
-    require('unplugin-starter/webpack')({ /* options */ })
+    require('unplugin-import-assets/webpack')({
+      imports: [
+        { targetDir: 'src/assets/images', prefix: 'Img' },
+        { targetDir: 'src/assets/icons', prefix: 'Svg', transformSvgToComponent: true },
+      ],
+    })
   ]
 }
 ```
-
-<br></details>
-
-<details>
-<summary>Nuxt</summary><br>
-
-```ts
-// nuxt.config.js
-export default {
-  buildModules: [
-    ['unplugin-starter/nuxt', { /* options */ }],
-  ],
-}
-```
-
-> This module works for both Nuxt 2 and [Nuxt Vite](https://github.com/nuxt/vite)
 
 <br></details>
 
@@ -99,25 +74,17 @@ export default {
 module.exports = {
   configureWebpack: {
     plugins: [
-      require('unplugin-starter/webpack')({ /* options */ }),
+      require('unplugin-import-assets/webpack')({
+        imports: [
+          { targetDir: 'src/assets/images', prefix: 'Img' },
+          { targetDir: 'src/assets/icons', prefix: 'Svg' },
+        ],
+      }),
     ],
   },
 }
 ```
 
 <br></details>
-
-<details>
-<summary>esbuild</summary><br>
-
-```ts
-// esbuild.config.js
-import { build } from 'esbuild'
-import Starter from 'unplugin-starter/esbuild'
-
-build({
-  plugins: [Starter()],
-})
-```
 
 <br></details>
