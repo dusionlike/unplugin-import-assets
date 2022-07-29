@@ -3,20 +3,31 @@ import path from 'path'
 import { watch } from 'chokidar'
 import { createFilter } from '@rollup/pluginutils'
 import type { FSWatcher } from 'chokidar'
-import type { ImportOptions, Options } from '../types'
-import { getTempPath, transformFileName } from './utils'
+import type { IPrefixOption, ImportOptions, Options } from '../types'
+import { getComponentPrefix, getTempPath, transformFileName } from './utils'
 import { transformSvgToVueComponent } from './svg'
-// import { transformSvgToReactComponent } from './svg'
 
 export async function runDeclareAssets(options: Options) {
   const watchList: FSWatcher[] = []
   for (const importItem of options.imports) {
+    if (typeof importItem.prefix !== 'string') {
+      importItem.prefix = importItem.prefix === false
+        ? undefined
+        : {
+            Svg: /\.svg$/i,
+            Img: /\.(png|jpe?g|gif|webp|ico)$/i,
+            Video: /\.(mp4|webm|m4v)$/i,
+            Audio: /\.(mp3|wav)$/i,
+            ...(typeof importItem.prefix === 'object' ? importItem.prefix : {}),
+          }
+    }
+
     const filter = createFilter(importItem.include, ['*.ts'])
     // 延迟操作，同时导出多个文件只执行一次
     let timer = undefined as any
 
     async function run() {
-      const source = await resolveDir(importItem, filter, options.porjectFramework)
+      const source = await resolveDir(importItem.targetDir, importItem, filter, options.porjectFramework)
       const dtsDir = importItem.dts || path.join(importItem.targetDir, 'index.d.ts')
       await fs.promises.writeFile(dtsDir, source, { encoding: 'utf8' })
     }
@@ -49,24 +60,32 @@ export async function runDeclareAssets(options: Options) {
  * @returns
  */
 async function resolveDir(
+  nowDir: string,
   importItem: ImportOptions,
   filter: (id: unknown) => boolean,
-  porjectFramework: 'vue' | 'react' | undefined,
+  porjectFramework?: 'vue' | 'react',
 ) {
+  const prefixOption = importItem.prefix as IPrefixOption | string
+
   const transformSvgToComponent = !!importItem.transformSvgToComponent
   const targetDir = importItem.targetDir
   let modelStr = ''
-  const dirList = await fs.promises.readdir(targetDir)
+  const dirList = await fs.promises.readdir(nowDir)
   for (const dir of dirList) {
-    const nowDir = path.join(targetDir, dir)
-    const stat = await fs.promises.stat(nowDir)
+    const nextDir = path.join(nowDir, dir)
+    const stat = await fs.promises.stat(nextDir)
     if (stat.isDirectory()) {
-      modelStr += await resolveDir({ ...importItem, targetDir: nowDir }, filter, porjectFramework)
+      modelStr += await resolveDir(nextDir, importItem, filter, porjectFramework)
     }
     else if (filter(dir)) {
-      const prefix = importItem.prefix ? `${importItem.prefix}-` : ''
-      const moduleName = transformFileName(`${prefix}${path.basename(dir)}`)
-      let modulePath = nowDir.replace(/\\/g, '/')
+      const prefix = getComponentPrefix(dir, prefixOption)
+
+      const moduleName = transformFileName(`${prefix ? `${prefix}-` : ''}`
+        + `${importItem.dirPrefix
+          ? nextDir.replace(/\\/g, '/').replace(targetDir, '')
+          : path.basename(dir)}`)
+
+      let modulePath = nextDir.replace(/\\/g, '/')
       if (modulePath[0] === '/')
         modulePath = modulePath.substring(1)
 

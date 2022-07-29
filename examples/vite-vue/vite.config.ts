@@ -7,8 +7,7 @@ export default defineConfig({
   plugins: [
     ImportAssets({
       imports: [
-        { targetDir: 'src/assets/images', prefix: 'Img' },
-        { targetDir: 'src/assets/icons', prefix: 'Svg', transformSvgToComponent: true },
+        { targetDir: 'src/assets', transformSvgToComponent: true, prefix: false, dirPrefix: true },
       ],
     }),
     vue(),

@@ -7,6 +7,8 @@ describe('utils', () => {
     expect(transformFileName('home_banner.jpg')).toBe('HomeBanner')
     expect(transformFileName('home_banner-test.webp')).toBe('HomeBannerTest')
     expect(transformFileName('home banner.test.webp')).toBe('HomeBannerTest')
+    expect(transformFileName('home/banner/test.webp')).toBe('HomeBannerTest')
+    expect(transformFileName('home\\banner\\test.webp')).toBe('HomeBannerTest')
   })
 
   it('getTempPath', () => {

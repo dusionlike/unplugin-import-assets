@@ -1,3 +1,5 @@
+import type { IPrefixOption } from '../types'
+
 /**
  * transform file name to UpperCamelCase
  * @param str
@@ -7,7 +9,8 @@ export function transformFileName(str: string): string {
   // 去掉后缀
   str = str.replace(/\.(\w+)$/, '')
 
-  str = str.replace(/[-_\.\s](\w)/g, (_, c) => c.toUpperCase())
+  str = str.replace(/[-_\.\s\\/](\w)/g, (_, c) => c.toUpperCase())
+  str = str.replace(/[-_\.\s\\/]/g, '')
   // 首字母大写
   str = str.replace(/^(\w)/g, (_, c) => c.toUpperCase())
 
@@ -32,4 +35,15 @@ export function createDirFilter(dirs: string[]) {
 export function getProjectFramework(packageJson: any): 'vue' | 'react' {
   const dependencies: Record<string, string> = { ...packageJson.dependencies, ...packageJson.devDependencies }
   return Object.keys(dependencies).some(key => key.includes('vue')) ? 'vue' : 'react'
+}
+
+/**
+ * 根据文件后缀获取对应的组件前缀
+ */
+export function getComponentPrefix(filePath: string, prefixOption?: IPrefixOption | string) {
+  if (!prefixOption)
+    return ''
+  if (typeof prefixOption === 'string')
+    return prefixOption
+  return Object.keys(prefixOption).find(key => prefixOption[key].test(filePath))
 }

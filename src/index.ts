@@ -7,10 +7,9 @@ import { createDirFilter, getProjectFramework } from './core/utils'
 import type { Options } from './types'
 import { transformSvgToReactComponent } from './core/svg'
 
-export default createUnplugin<Options>((_options) => {
-  if (!_options)
+export default createUnplugin<Options>((options) => {
+  if (!options)
     throw new Error('options is required')
-  const options = initOption(_options)
 
   const cwd = path.resolve('./')
 
@@ -57,7 +56,3 @@ export default createUnplugin<Options>((_options) => {
     },
   }
 })
-
-function initOption(options: Options): Options {
-  return options
-}

@@ -2,15 +2,13 @@
 
 [![NPM version](https://img.shields.io/npm/v/unplugin-import-assets?color=a1b858&label=)](https://www.npmjs.com/package/unplugin-import-assets)
 
-Starter template for [unplugin](https://github.com/unjs/unplugin).
-
 ## Why?
 
 自动生成资源文件的typescript声明文件，让你import资源文件的时候也能有代码提示，自动导入
 
 ## Features
 
-灵感来自[vite-plugin-hot-export](https://github.com/sudongyuer/vite-plugin-hot-export)，但是
+灵感来自[vite-plugin-hot-export](https://github.com/sudongyuer/vite-plugin-hot-export)，感谢 [@sudongyuer](https://github.com/sudongyuer)，但是
 
 - 只生成 `d.ts` 文件，没有引用的文件不会被打包
 - import时显示完整路径，可与vscode扩展 [Image preview](https://marketplace.visualstudio.com/items?itemName=kisstkondoros.vscode-gutter-preview) 配合
@@ -24,6 +22,54 @@ Starter template for [unplugin](https://github.com/unjs/unplugin).
 ## 使用
 
 
+### 配置
+
+```ts
+export interface Options {
+  /**
+   * 需要处理的目录
+   */
+  imports: ImportOptions[]
+  porjectFramework?: 'vue' | 'react'
+  /**
+   * 导出模块名前缀，设置为false关闭
+   * 例子： { Img: /\.(png|jpe?g|gif|webp|ico)/i }
+   */
+  prefixOption?: IPrefixOption | boolean
+  /**
+   * 以文件目录为前缀，连接在prefixOption之后
+   * 如 /src/assets/home/banner.jpg => ImgHomeBanner
+   */
+  dirPrefix: boolean
+}
+
+export interface IPrefixOption {
+  [key: string]: RegExp
+}
+
+export interface ImportOptions {
+  /**
+   * 目标目录
+   */
+  targetDir: string
+  /**
+   * 筛选文件
+   */
+  include?: FilterPattern
+  /**
+   * 声明文件目录，默认为 targetDir + index.d.ts
+   */
+  dts?: string
+  /**
+   * 是否将svg转换成组件，默认false
+   */
+  transformSvgToComponent?: boolean
+}
+
+export type FilterPattern = string | RegExp | readonly (string | RegExp)[]
+```
+
+
 ### Vite
 
 ```ts
@@ -34,8 +80,7 @@ export default defineConfig({
   plugins: [
     ImportAssets({
       imports: [
-        { targetDir: 'src/assets/images', prefix: 'Img' },
-        { targetDir: 'src/assets/icons', prefix: 'Svg', transformSvgToComponent: true },
+        { targetDir: 'src/assets', transformSvgToComponent: true },
       ],
     }),
   ],
@@ -52,8 +97,7 @@ module.exports = {
   plugins: [
     require('unplugin-import-assets/webpack')({
       imports: [
-        { targetDir: 'src/assets/images', prefix: 'Img' },
-        { targetDir: 'src/assets/icons', prefix: 'Svg', transformSvgToComponent: true },
+        { targetDir: 'src/assets', transformSvgToComponent: true },
       ],
     })
   ]
@@ -69,13 +113,10 @@ module.exports = {
     plugins: [
       require('unplugin-import-assets/webpack')({
         imports: [
-          { targetDir: 'src/assets/images', prefix: 'Img' },
-          { targetDir: 'src/assets/icons', prefix: 'Svg', transformSvgToComponent: true },
+          { targetDir: 'src/assets', transformSvgToComponent: true },
         ],
       }),
     ],
   },
 }
 ```
-
-> todo: 蹲一个有缘人帮忙写英文readme
